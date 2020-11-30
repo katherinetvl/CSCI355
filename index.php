@@ -1,62 +1,74 @@
 <?php 
-// connect to database
-$conn = mysqli_connect("localhost:3307", "root", "", "forphpconnect");
-
-// check connection
-if(!$conn)
-{
-    echo "Warning: Connection error" . mysqli_connect_error();
-    exit;
-}
+require_once('config.php');
 ?>
 
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html>
 <head>
-<title> Database Create, Retrieve, Update, Delete </title>
-</head>
-    <body>
+    <title> Group 5 CRUD via PHP </title>
+</head> 
+<body>
+<h2> Current Database is: forphpconnect </h2>
     <?php 
-        if($conn)
+        if($mysqli)
         {
-            echo "Current Table: PAYMENT_METHOD <br>";
-            echo "Current database: Netflix <br>";
-            echo "Columns: id | CreditCardNumber(NN) | CVV | ExpirationDate | AcctID (NN) <br>";
+            echo "<b> Current Table: </b><br>";
+            echo "<pre>     user</pre><br>";
+            echo "<b> Columns: </b><br>";
+            echo "<pre>     id | fname(NN) | age(NN)</pre><br>";
+            echo "----------------------------------------------------------------------------------- <br>";
         }
     ?>
-
     <?php 
-        if($_SERVER['REQUEST_METHOD'] == 'GET')
+       if($_SERVER['REQUEST_METHOD'] == 'GET')
+       {
+        ?>
+        <p> Please choose an option to below to interact with the database.</p>
+        <form method = "POST" action = "index.php">
+            <label> Commands: 
+            <br>
+                <select name="commands[]" size="4" multiple>
+                <option value= "insert">Insert</option>
+                <option value= "select">Select</option>
+                <option value= "update">Update</option>
+                <option value= "delete">Delete</option>
+                </select>
+            </label>
+            <br>
+            <button type = "submit" name = "submit"> Submit </button></br>
+        </form>
+        <?php 
+       }
+    else if(isset($_POST['submit']))
+    {
+        if(isset($_POST['commands']))
         {
-            ?>
-            <!-- form begins -->
-            <form method = "POST" action = "index.php">
-            <label for="commands">Choose an option:</label>
-            <select id="commands" name="commands" size="1">
-            <option value="insert">Insert</option>
-            <option value="select">Select</option>
-            <option value="update">Update</option>
-            <option value="delete">Delete</option>
-            </select> 
-            </form>
-
-            <?php
-        }
-        else if(isset($_POST['commands']))
-        {
-            if($_POST['commands]'] != '')
+            $commandArr = array();
+            foreach($_POST['commands'] as $singleCommand)
             {
-                $command = $_POST['commands'];
+                $commandArr[] = $singleCommand;
             }
-            
-            echo "User chose: $command <br>";
+        }
 
-        }
-        else 
+        echo "These are your chosen command(s) <br>";
+        echo "Click on the link to fill out form for each <br>";
+        foreach($commandArr as $theCommand)
         {
-            echo "Make a command selection to make changes to this table.";
+            echo "$theCommand <br>";
+            if($theCommand == "insert")
+            {
+                echo "<a href='insertcommand.php' target=_blank>" . "Insert Form" . "</a>";
+            }
         }
-            ?>
-    
-    </body>
+
+        // Let user perform another action
+        // echo "<br>";
+        // echo "<a href='index.php'>" . "Return to Index" . "</a>";
+    }
+    else
+    {
+        echo "Please fill out form to continue.";
+    }
+    ?>
+</body>
 </html>
