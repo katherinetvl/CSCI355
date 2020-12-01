@@ -6,6 +6,11 @@
 <html>
 <head>
     <title> Katherine Le CRUD via PHP </title>
+    <style>
+         table, th, td {
+            border: 1px solid black;
+         }
+      </style>
 </head> 
 <body>
 <h2> Current Database is: forphpconnect </h2>
@@ -28,17 +33,17 @@
     ?>
         <table>
             <thead>
-            <th> id </th>
-            <th> fname </th>
-            <th> age </th>
+            <th style="padding:10px"> id </th>
+            <th style="padding:10px"> fname </th>
+            <th style="padding:10px"> age </th>
             </thead>
 
         <?php
             while($row = $result->fetch_assoc()): ?>
             <tr>
-            <td><?php echo $row['id']; ?></td>
-            <td><?php echo $row['fname']; ?></td>
-            <td><?php echo $row['age']; ?></td>
+            <td style="padding:10px"><?php echo $row['id']; ?></td>
+            <td style="padding:10px"><?php echo $row['fname']; ?></td>
+            <td style="padding:10px"><?php echo $row['age']; ?></td>
             </tr>
         <?php endwhile; ?>
         </table>
@@ -49,9 +54,12 @@
         ?>
         <p> Enter data below as well as choose command.</p>
         <form method = "POST" action = "index.php">
-            <label> id: <input type = "text" name = "inputName"> </input></label><br>
-            <label> fname: <input type = "text" name = "fname"> </input></label></br>
-            <label> age: <input type = "number" name = "age" min = "0" max = "110"> </input></label></br>
+            <label for = "inputName">id:</label><br>
+            <input type = "text" id = "inputName" name = "inputName"></input><br>
+            <label for ="fname"> fname:</label></br>
+            <input type = "text" id = "fname" name = "fname"></input><br>
+            <label for="age"> age:</label></br>
+            <input type = "number" name = "age" min = "0" max = "110"> </input></br>
             <br>
             <label> Commands: 
             <br>
@@ -80,7 +88,6 @@
 
         foreach($commandArr as $theCommand)
         {
-            echo "$theCommand <br>";
             if($theCommand == "insert")
             {
                 if(isset($_POST['fname']) && isset($_POST['age']))
