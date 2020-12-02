@@ -1,5 +1,9 @@
 <?php 
     require_once('netflixconfig.php');
+    $host = 'localhost:3308';
+    $user = 'root';
+    $pw = '';
+    $database = 'netflix';
 ?>
 
 <!DOCTYPE html> 
@@ -13,7 +17,7 @@
       </style>
 </head> 
 <body>
-<h2> Current Database is: forphpconnect </h2>
+<h2> Current Database is: Netflix </h2>
     <?php 
         if($mysqli)
         {
@@ -25,10 +29,6 @@
             echo "----------------------------------------------------------------------------------- <br>";
         }
 
-        $host = 'localhost:3308';
-        $user = 'root';
-        $pw = '';
-        $database = 'netflix';
         $mysqli = new mysqli($host, $user, $pw, $database);
         $result = $mysqli->query("SELECT * FROM payment_method") or die($mysqli->error);
     ?>
@@ -60,15 +60,15 @@
         <p> Enter values below as well as choose command.</p>
         <form method = "POST" action = "netflixindex.php">
             <label for = "id">id:</label><br>
-            <input type = "number" id = "id" name = "id" min = "0" max = "18446744073709551615"></input></br>
+            <input type = "number" id = "id" name = "id" min = "1" max = "18446744073709551615"></input></br>
             <label for ="CreditCardNumber">CreditCardNumber:</label></br>
-            <input type = "number" id = "CreditCardNumber" name = "CreditCardNumber" min = "0" max = "18446744073709551615"></input><br>
+            <input type = "number" id = "CreditCardNumber" name = "CreditCardNumber" min = "1111111111111111" max = "9999999999999999"></input><br>
             <label for = "CVV"> CVV:</label></br>
-            <input type = "number" id = "CVV" name = "CVV" min = "001" max = "999"> </input></br>
+            <input type = "number" id = "CVV" name = "CVV" min = "111" max = "999"> </input></br>
             <label for ="ExpirationDate">ExpirationDate:</label></br>
             <input type = "date" id = "ExpirationDate" name = "ExpirationDate"></input><br>
             <label for = "AcctID "> AcctID :</label></br>
-            <input type = "number" id = "AcctID" name = "AcctID" min = "0" max = "18446744073709551615"></input></br>
+            <input type = "number" id = "AcctID" name = "AcctID" min = "1" max = "18446744073709551615"></input></br>
             <br>
 
             <label> Commands: 
@@ -82,7 +82,8 @@
             </label>
             <br>
 
-            <label> WHERE column: (Specify for UPDATE command only)
+            <p>----------------------------------------------------------------------------------- </p>
+            <label> WHERE column: (Specify for update command only)
             <br>
             <select name="whereCondition" size="5">
                 <option value= "id">id</option>
@@ -93,7 +94,8 @@
                 </select>
             </label>
             <br>
-
+            <br>
+            <br>
             <button type = "submit" name = "submit"> Submit </button></br>
         </form>
         <?php 
@@ -120,16 +122,16 @@
                     $CVV = $_POST['CVV'];
                     $ExpirationDate = $_POST['ExpirationDate'];
                     $AcctID = $_POST['AcctID'];
-                    $sql = "INSERT INTO payment_method (id, CreditCardNumber, CVV, ExpirationDate, AcctID) VALUES ('$id', '$CreditCardNumber', '$CVV', '$ExpirationDate', '$AcctID')"; 
-                    if (mysqli_query($mysqli, $sql)) 
-                    {
-                        $message = "$theCommand was executed. <br>";
-                        echo $message . "<br>";
-                    } 
-                    else
-                    {
-                        echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                    }
+
+                    $mysqli = new mysqli($host, $user, $pw, $database);
+                    $sql = "INSERT INTO payment_method (id, CreditCardNumber, CVV, ExpirationDate, AcctID) VALUES (?, ?, ?, ?, ?)"; 
+
+                    $stmt = $mysqli->prepare($sql);
+                    $stmt->bind_param("iiisi", $id, $CreditCardNumber, $CVV, $ExpirationDate, $AcctID);
+                    $stmt->execute();
+                    echo "<br>Query has been processed. <br>";
+                    printf("Affected rows (INSERT): %d\n", $mysqli->affected_rows);
+                    $mysqli->close();
                 }
                 else if(isset($_POST['CreditCardNumber']) && isset($_POST['CVV']) && isset($_POST['ExpirationDate']) && isset($_POST['AcctID']))
                 {
@@ -137,66 +139,68 @@
                     $CVV = $_POST['CVV'];
                     $ExpirationDate = $_POST['ExpirationDate'];
                     $AcctID = $_POST['AcctID'];
-                    $sql = "INSERT INTO payment_method (CreditCardNumber, CVV, ExpirationDate, AcctID) VALUES ('$CreditCardNumber', '$CVV', '$ExpirationDate', '$AcctID')"; 
-                    if (mysqli_query($mysqli, $sql)) 
-                    {
-                        $message = "$theCommand was executed. <br>";
-                        echo $message . "<br>";
-                    } 
-                    else 
-                    {
-                        echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                    }
+                    
+                    $mysqli = new mysqli($host, $user, $pw, $database);
+                    $sql = "INSERT INTO payment_method (CreditCardNumber, CVV, ExpirationDate, AcctID) VALUES (?, ?, ?, ?)"; 
+
+                    $stmt = $mysqli->prepare($sql);
+                    $stmt->bind_param("iisi", $CreditCardNumber, $CVV, $ExpirationDate, $AcctID);
+                    $stmt->execute();
+                    echo "<br>Query has been processed. <br>";
+                    printf("Affected rows (INSERT): %d\n", $mysqli->affected_rows);
+                    $mysqli->close();
                 }
                 else if(isset($_POST['CreditCardNumber']) && isset($_POST['CVV']) && isset($_POST['AcctID']))
                 {
                     $CreditCardNumber = $_POST['CreditCardNumber'];
                     $CVV = $_POST['CVV'];
                     $AcctID = $_POST['AcctID'];
-                    $sql = "INSERT INTO payment_method (CreditCardNumber, CVV, AcctID) VALUES ('$CreditCardNumber', '$CVV', '$AcctID')"; 
-                    if (mysqli_query($mysqli, $sql)) 
-                    {
-                        $message = "$theCommand was executed. <br>";
-                        echo $message . "<br>";
-                    } 
-                    else 
-                    {
-                        echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                    }
+
+                    $mysqli = new mysqli($host, $user, $pw, $database);
+                    $sql = "INSERT INTO payment_method (CreditCardNumber, CVV, AcctID) VALUES (?, ?, ?)"; 
+
+                    $stmt = $mysqli->prepare($sql);
+                    $stmt->bind_param("iii", $CreditCardNumber, $CVV, $AcctID);
+                    $stmt->execute();
+                    echo "<br>Query has been processed. <br>";
+                    printf("Affected rows (INSERT): %d\n", $mysqli->affected_rows);
+                    $mysqli->close();
                 }
                 else if(isset($_POST['CreditCardNumber']) && isset($_POST['ExpirationDate']) && isset($_POST['AcctID']))
                 {
                     $CreditCardNumber = $_POST['CreditCardNumber'];
                     $ExpirationDate = $_POST['ExpirationDate'];
                     $AcctID = $_POST['AcctID'];
-                    $sql = "INSERT INTO payment_method (CreditCardNumber, ExpirationDate, AcctID) VALUES ('$CreditCardNumber', '$ExpirationDate', '$AcctID')"; 
-                    if (mysqli_query($mysqli, $sql)) 
-                    {
-                        $message = "$theCommand was executed. <br>";
-                        echo $message . "<br>";
-                    } 
-                    else 
-                    {
-                        echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                    }
+
+                    $mysqli = new mysqli($host, $user, $pw, $database);
+                    $sql = "INSERT INTO payment_method (CreditCardNumber, ExpirationDate, AcctID) VALUES (?, ?, ?)"; 
+
+                    $stmt = $mysqli->prepare($sql);
+                    $stmt->bind_param("isi", $CreditCardNumber, $ExpirationDate, $AcctID);
+                    $stmt->execute();
+                    echo "<br>Query has been processed. <br>";
+                    printf("Affected rows (INSERT): %d\n", $mysqli->affected_rows);
+                    $mysqli->close();
+                }
+                else if(isset($_POST['CreditCardNumber']) && isset($_POST['AcctID']))
+                {
+                    $CreditCardNumber = $_POST['CreditCardNumber'];
+                    $AcctID = $_POST['AcctID'];
+
+                    $mysqli = new mysqli($host, $user, $pw, $database);
+                    $sql = "INSERT INTO payment_method (CreditCardNumber, AcctID) VALUES (?, ?)"; 
+
+                    $stmt = $mysqli->prepare($sql);
+                    $stmt->bind_param("ii", $CreditCardNumber, $AcctID);
+                    $stmt->execute();
+                    echo "<br>Query has been processed. <br>";
+                    printf("Affected rows (INSERT): %d\n", $mysqli->affected_rows);
+                    $mysqli->close();
                 }
                 else
                 {
-                    if(isset($_POST['CreditCardNumber']) && isset($_POST['AcctID']))
-                    {
-                        $CreditCardNumber = $_POST['CreditCardNumber'];
-                        $AcctID = $_POST['AcctID'];
-                        $sql = "INSERT INTO payment_method (CreditCardNumber, AcctID) VALUES ('$CreditCardNumber', '$AcctID')"; 
-                        if (mysqli_query($mysqli, $sql)) 
-                        {
-                            $message = "$theCommand was executed. <br>";
-                            echo $message . "<br>";
-                        } 
-                        else 
-                        {
-                            echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                        }
-                    }
+                    echo "Enter values to insert into table <br>";
+                    exit("<a href='netflixindex.php'>" . "Return to Homepage" . "</a>");
                 }
             }
             if($theCommand == "select")
@@ -204,90 +208,17 @@
                 if(isset($_POST['id']))
                 {
                     $id = $_POST['id'];
-                    $sql = "SELECT * FROM payment_method WHERE id = '$id'";
-                    if (mysqli_query($mysqli, $sql)) 
-                    {
-                        $mysqli = new mysqli($host, $user, $pw, $database);
-                        $result = $mysqli->query($sql) or die($mysqli->error);
-                        ?>
-                        <table>
-                            <thead>
-                            <th style="padding:10px"> id </th>
-                            <th style="padding:10px"> CreditCardNumber </th>
-                            <th style="padding:10px"> CVV </th>
-                            <th style="padding:10px"> ExpirationDate </th>
-                            <th style="padding:10px"> AcctID </th>
-                            </thead>
 
-                        <?php
-                            while($row = $result->fetch_assoc()): ?>
-                            <tr>
-                            <td style="padding:10px"><?php echo $row['id']; ?></td>
-                            <td style="padding:10px"><?php echo $row['CreditCardNumber']; ?></td>
-                            <td style="padding:10px"><?php echo $row['CVV']; ?></td>
-                            <td style="padding:10px"><?php echo $row['ExpirationDate']; ?></td>
-                            <td style="padding:10px"><?php echo $row['AcctID']; ?></td>
-                            </tr>
-                        <?php endwhile; ?>
-                        </table>
-                        <?php
-                    }
-                    else 
-                    {
-                        echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-                    }
-                }
-                else if(isset($_POST['CreditCardNumber']) && isset($_POST['CVV']) && isset($_POST['ExpirationDate']) && isset($_POST['AcctID']))
-                {
-                    $CreditCardNumber = $_POST['CreditCardNumber'];
-                    $CVV = $_POST['CVV'];
-                    $ExpirationDate = $_POST['ExpirationDate'];
-                    $AcctID = $_POST['AcctID'];
-                    $sql = "SELECT * FROM payment_method WHERE CreditCardNumber = '$CreditCardNumber' AND CVV = '$CVV' AND ExpirationDate = '$ExpirationDate' AND AcctID = '$AcctID'";
-                    if (mysqli_query($mysqli, $sql)) 
-                    {
-                        $mysqli = new mysqli($host, $user, $pw, $database);
-                        $result = $mysqli->query($sql) or die($mysqli->error);
-                        ?>
-                        <table>
-                            <thead>
-                            <th style="padding:10px"> id </th>
-                            <th style="padding:10px"> CreditCardNumber </th>
-                            <th style="padding:10px"> CVV </th>
-                            <th style="padding:10px"> ExpirationDate </th>
-                            <th style="padding:10px"> AcctID </th>
-                            </thead>
-
-                        <?php
-                            while($row = $result->fetch_assoc()): ?>
-                            <tr>
-                            <td style="padding:10px"><?php echo $row['id']; ?></td>
-                            <td style="padding:10px"><?php echo $row['CreditCardNumber']; ?></td>
-                            <td style="padding:10px"><?php echo $row['CVV']; ?></td>
-                            <td style="padding:10px"><?php echo $row['ExpirationDate']; ?></td>
-                            <td style="padding:10px"><?php echo $row['AcctID']; ?></td>
-                            </tr>
-                        <?php endwhile; ?>
-                        </table>
-                        <?php
-                    } 
-                    else 
-                    {
-                        echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-                    }
-                }
-                else if(isset($_POST['CreditCardNumber']) && isset($_POST['CVV']) && isset($_POST['AcctID']))
-                {
-                    $CreditCardNumber = $_POST['CreditCardNumber'];
-                    $CVV = $_POST['CVV'];
-                    $AcctID = $_POST['AcctID'];
-                    $sql = "SELECT * FROM payment_method WHERE CreditCardNumber = '$CreditCardNumber' AND CVV = '$CVV' AND AcctID = '$AcctID'";
+                    $mysqli = new mysqli($host, $user, $pw, $database);
+                    $sql = "SELECT * FROM payment_method WHERE id = ?";
                     
-                    if (mysqli_query($mysqli, $sql)) 
-                    {
-                        $mysqli = new mysqli($host, $user, $pw, $database);
-                        $result = $mysqli->query($sql) or die($mysqli->error);
-                        ?>
+                    $stmt = $mysqli->prepare($sql);
+                    $stmt->bind_param("i", $id);
+                    $stmt->execute();
+                     
+                    $result = $stmt->get_result();
+                    ?>
+                        <p> Selection result: </p>
                         <table>
                             <thead>
                             <th style="padding:10px"> id </th>
@@ -308,164 +239,11 @@
                             </tr>
                         <?php endwhile; ?>
                         </table>
-                        <?php
-                    } 
-                    else 
-                    {
-                        echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-                    }
+                    <?php
                 }
-                else if(isset($_POST['CreditCardNumber']) && isset($_POST['ExpirationDate']) && isset($_POST['AcctID']))
+                else
                 {
-                    $CreditCardNumber = $_POST['CreditCardNumber'];
-                    $ExpirationDate = $_POST['ExpirationDate'];
-                    $AcctID = $_POST['AcctID'];
-                    $sql = "SELECT * FROM payment_method WHERE CreditCardNumber = '$CreditCardNumber' AND CVV = '$CVV' AND ExpirationDate = '$ExpirationDate' AND AcctID = '$AcctID'";
-                    
-                    if (mysqli_query($mysqli, $sql)) 
-                    {
-                        $mysqli = new mysqli($host, $user, $pw, $database);
-                        $result = $mysqli->query($sql) or die($mysqli->error);
-                        ?>
-                        <table>
-                            <thead>
-                            <th style="padding:10px"> id </th>
-                            <th style="padding:10px"> CreditCardNumber </th>
-                            <th style="padding:10px"> CVV </th>
-                            <th style="padding:10px"> ExpirationDate </th>
-                            <th style="padding:10px"> AcctID </th>
-                            </thead>
-
-                        <?php
-                            while($row = $result->fetch_assoc()): ?>
-                            <tr>
-                            <td style="padding:10px"><?php echo $row['id']; ?></td>
-                            <td style="padding:10px"><?php echo $row['CreditCardNumber']; ?></td>
-                            <td style="padding:10px"><?php echo $row['CVV']; ?></td>
-                            <td style="padding:10px"><?php echo $row['ExpirationDate']; ?></td>
-                            <td style="padding:10px"><?php echo $row['AcctID']; ?></td>
-                            </tr>
-                        <?php endwhile; ?>
-                        </table>
-                        <?php
-                    } 
-                    else 
-                    {
-                        echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-                    }
-                }
-                else if(isset($_POST['CreditCardNumber']) && isset($_POST['AcctID']))
-                {
-                    $CreditCardNumber = $_POST['CreditCardNumber'];
-                    $AcctID = $_POST['AcctID'];
-                    $sql = "SELECT * FROM payment_method WHERE CreditCardNumber = '$CreditCardNumber' AND CVV = '$CVV' AND ExpirationDate = '$ExpirationDate' AND AcctID = '$AcctID'";
-                    
-                    if (mysqli_query($mysqli, $sql)) 
-                    {
-                        $mysqli = new mysqli($host, $user, $pw, $database);
-                        $result = $mysqli->query($sql) or die($mysqli->error);
-                        ?>
-                        <table>
-                            <thead>
-                            <th style="padding:10px"> id </th>
-                            <th style="padding:10px"> CreditCardNumber </th>
-                            <th style="padding:10px"> CVV </th>
-                            <th style="padding:10px"> ExpirationDate </th>
-                            <th style="padding:10px"> AcctID </th>
-                            </thead>
-
-                        <?php
-                            while($row = $result->fetch_assoc()): ?>
-                            <tr>
-                            <td style="padding:10px"><?php echo $row['id']; ?></td>
-                            <td style="padding:10px"><?php echo $row['CreditCardNumber']; ?></td>
-                            <td style="padding:10px"><?php echo $row['CVV']; ?></td>
-                            <td style="padding:10px"><?php echo $row['ExpirationDate']; ?></td>
-                            <td style="padding:10px"><?php echo $row['AcctID']; ?></td>
-                            </tr>
-                        <?php endwhile; ?>
-                        </table>
-                        <?php
-                    } 
-                    else 
-                    {
-                        echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-                    }
-                }
-                else 
-                {
-                    if(isset($_POST['CreditCardNumber']))
-                    {
-                        $CreditCardNumber = $_POST['CreditCardNumber'];
-                        $sql = "SELECT * FROM payment_method WHERE CreditCardNumber = '$CreditCardNumber'";
-                        if (mysqli_query($mysqli, $sql)) 
-                        {
-                            $mysqli = new mysqli($host, $user, $pw, $database);
-                            $result = $mysqli->query($sql) or die($mysqli->error);
-                            ?>
-                            <table>
-                                <thead>
-                                <th style="padding:10px"> id </th>
-                                <th style="padding:10px"> CreditCardNumber </th>
-                                <th style="padding:10px"> CVV </th>
-                                <th style="padding:10px"> ExpirationDate </th>
-                                <th style="padding:10px"> AcctID </th>
-                                </thead>
-
-                            <?php
-                                while($row = $result->fetch_assoc()): ?>
-                                <tr>
-                                <td style="padding:10px"><?php echo $row['id']; ?></td>
-                                <td style="padding:10px"><?php echo $row['CreditCardNumber']; ?></td>
-                                <td style="padding:10px"><?php echo $row['CVV']; ?></td>
-                                <td style="padding:10px"><?php echo $row['ExpirationDate']; ?></td>
-                                <td style="padding:10px"><?php echo $row['AcctID']; ?></td>
-                                </tr>
-                            <?php endwhile; ?>
-                            </table>
-                            <?php
-                        } 
-                        else 
-                        {
-                            echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-                        }
-                    }
-                    if(isset($_POST['AcctID']))
-                    {
-                        $AcctID = $_POST['AcctID'];
-                        $sql = "SELECT * FROM payment_method WHERE AcctID = '$AcctID'";
-                        if (mysqli_query($mysqli, $sql)) 
-                        {
-                            $mysqli = new mysqli($host, $user, $pw, $database);
-                            $result = $mysqli->query($sql) or die($mysqli->error);
-                            ?>
-                            <table>
-                                <thead>
-                                <th style="padding:10px"> id </th>
-                                <th style="padding:10px"> CreditCardNumber </th>
-                                <th style="padding:10px"> CVV </th>
-                                <th style="padding:10px"> ExpirationDate </th>
-                                <th style="padding:10px"> AcctID </th>
-                                </thead>
-
-                            <?php
-                                while($row = $result->fetch_assoc()): ?>
-                                <tr>
-                                <td style="padding:10px"><?php echo $row['id']; ?></td>
-                                <td style="padding:10px"><?php echo $row['CreditCardNumber']; ?></td>
-                                <td style="padding:10px"><?php echo $row['CVV']; ?></td>
-                                <td style="padding:10px"><?php echo $row['ExpirationDate']; ?></td>
-                                <td style="padding:10px"><?php echo $row['AcctID']; ?></td>
-                                </tr>
-                            <?php endwhile; ?>
-                            </table>
-                            <?php
-                        } 
-                        else 
-                        {
-                            echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-                        }
-                    }
+                    echo "Specify the id value for WHERE clause using the form <br>";
                 }
             }
             if($theCommand == "update")
@@ -474,20 +252,25 @@
                 {
                     $whereCondition = $_POST['whereCondition'];
                     
-                    if(!$whereCondition == "id")
-                    {
-                        echo "Specify id for WHERE clause <br>";
-                    }
-                    else
+                    // updating using id 
+                    if($whereCondition == "id")
                     {
                         if(isset($_POST['id']))
                         {
                             $id = $_POST['id'];
-
+    
                             if(isset($_POST['CVV']) && isset($_POST['ExpirationDate']))
                             {
-                                $CVV = $_POST['CVV'];
-                                $ExpirationDate = $_POST['ExpirationDate'];
+                                if($_POST['CVV'] != '' && $_POST['ExpirationDate'] != '')
+                                {
+                                    $CVV = $_POST['CVV'];
+                                    $ExpirationDate = $_POST['ExpirationDate'];
+                                }
+                                else 
+                                {
+                                    echo "Enter values for both CVV and ExpirationDate to update. <br>";
+                                    exit("<a href='netflixindex.php'>" . "Return to Homepage" . "</a>");
+                                }
                                 $sql = "UPDATE payment_method SET CVV = '$CVV', ExpirationDate = '$ExpirationDate' WHERE id = '$id'"; 
                                 if (mysqli_query($mysqli, $sql)) 
                                 {
@@ -499,24 +282,11 @@
                                     echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
                                 }
                             }
-                            else if(isset($_POST['CVV']))
+                            else if(isset($_POST['CreditCardNumber']) && isset($_POST['AcctID']))
                             {
-                                $CVV = $_POST['CVV'];
-                                $sql = "UPDATE payment_method SET CVV = '$CVV' WHERE id = '$id'"; 
-                                if (mysqli_query($mysqli, $sql)) 
-                                {
-                                    $message = "$theCommand was executed. <br>";
-                                    echo $message . "<br>";
-                                } 
-                                else 
-                                {
-                                    echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                                }
-                            }
-                            else if(isset($_POST['ExpirationDate']))
-                            {
-                                $ExpirationDate = $_POST['ExpirationDate'];
-                                $sql = "UPDATE payment_method SET ExpirationDate = '$ExpirationDate' WHERE id = '$id'"; 
+                                $CreditCardNumber = $_POST['CreditCardNumber'];
+                                $AcctID = $_POST['AcctID'];
+                                $sql = "UPDATE payment_method SET CreditCardNumber = '$CreditCardNumber', AcctID = '$AcctID' WHERE id = '$id'"; 
                                 if (mysqli_query($mysqli, $sql)) 
                                 {
                                     $message = "$theCommand was executed. <br>";
@@ -529,173 +299,18 @@
                             }
                             else
                             {
-                                if(isset($_POST['CreditCardNumber']) && isset($_POST['AcctID']))
-                                {
-                                    $CreditCardNumber = $_POST['CreditCardNumber'];
-                                    $AcctID = $_POST['AcctID'];
-                                    $sql = "UPDATE payment_method SET CreditCardNumber = '$CreditCardNumber', AcctID = '$AcctID' WHERE id = '$id'"; 
-                                    if (mysqli_query($mysqli, $sql)) 
-                                    {
-                                        $message = "$theCommand was executed. <br>";
-                                        echo $message . "<br>";
-                                    } 
-                                    else 
-                                    {
-                                        echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                                    }
-                                }
+                                echo "Enter values for the pairs CVV and ExpirationDate or CreditCardNumber and AcctID that you'd like to update <br>";
                             }
                         }
                     }
-                }
-                // gonna delete all the below. Limiting user to 
-                // just id for updating. 
-                    if($whereCondition == "CreditCardNumber")
+                    else
                     {
-                        if(isset($_POST['CreditCardNumber']))
-                        {
-                            $CreditCardNumber = $_POST['CreditCardNumber'];
-                            if(isset($_POST['id']))
-                            {
-                                $id = $_POST['id'];
-                                $sql = "UPDATE payment_method SET id = '$id' WHERE CreditCardNumber = '$CreditCardNumber'"; 
-                                if (mysqli_query($mysqli, $sql)) 
-                                {
-                                    $message = "$theCommand was executed. <br>";
-                                    echo $message . "<br>";
-                                } 
-                                else 
-                                {
-                                    echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                                }
-                            }
-                            else if(isset($_POST['CVV']) && isset($_POST['ExpirationDate']))
-                            {
-                                $CVV = $_POST['CVV'];
-                                $ExpirationDate = $_POST['ExpirationDate'];
-                                $sql = "UPDATE payment_method SET CVV = '$CVV', ExpirationDate ='$ExpirationDate' WHERE CreditCardNumber = '$CreditCardNumber'"; 
-                                if (mysqli_query($mysqli, $sql)) 
-                                {
-                                    $message = "$theCommand was executed. <br>";
-                                    echo $message . "<br>";
-                                } 
-                                else 
-                                {
-                                    echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                                }
-                            }
-                            else if(isset($_POST['CVV']))
-                            {
-                                $CVV = $_POST['CVV'];
-                                $sql = "UPDATE payment_method SET CVV = '$CVV' WHERE CreditCardNumber = '$CreditCardNumber'"; 
-                                if (mysqli_query($mysqli, $sql)) 
-                                {
-                                    $message = "$theCommand was executed. <br>";
-                                    echo $message . "<br>";
-                                } 
-                                else 
-                                {
-                                    echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                                }
-                            }
-                            else 
-                            {
-                                if(isset($_POST['ExpirationDate']))
-                                {
-                                    $ExpirationDate = $_POST['ExpirationDate'];
-                                    $sql = "UPDATE payment_method SET ExpirationDate = '$ExpirationDate' WHERE CreditCardNumber = '$CreditCardNumber'"; 
-                                    if (mysqli_query($mysqli, $sql)) 
-                                    {
-                                        $message = "$theCommand was executed. <br>";
-                                        echo $message . "<br>";
-                                    } 
-                                    else 
-                                    {
-                                        echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                                    }
-                                }
-                            }
-                        }
-                        else 
-                        {
-                            echo "Specify CreditCardNumber value for WHERE clause <br>";
-                        }
-                    }
-                    if($whereCondition == "AcctID")
-                    {
-                        if(isset($_POST['AcctID']))
-                        {
-                            $AcctID = $_POST['AcctID'];
-                            if(isset($_POST['id']))
-                            {
-                                $id = $_POST['id'];
-                                $sql = "UPDATE payment_method SET id = '$id' WHERE AcctID = '$AcctID'"; 
-                                if (mysqli_query($mysqli, $sql)) 
-                                {
-                                    $message = "$theCommand was executed. <br>";
-                                    echo $message . "<br>";
-                                } 
-                                else 
-                                {
-                                    echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                                }
-                            }
-                            else if(isset($_POST['CVV']) && isset($_POST['ExpirationDate']))
-                            {
-                                $CVV = $_POST['CVV'];
-                                $ExpirationDate = $_POST['ExpirationDate'];
-                                $sql = "UPDATE payment_method SET CVV = '$CVV', ExpirationDate ='$ExpirationDate' WHERE AcctID = '$AcctID'"; 
-                                if (mysqli_query($mysqli, $sql)) 
-                                {
-                                    $message = "$theCommand was executed. <br>";
-                                    echo $message . "<br>";
-                                } 
-                                else 
-                                {
-                                    echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                                }
-                            }
-                            else if(isset($_POST['CVV']))
-                            {
-                                $CVV = $_POST['CVV'];
-                                $sql = "UPDATE payment_method SET CVV = '$CVV' WHERE AcctID = '$AcctID'"; 
-                                if (mysqli_query($mysqli, $sql)) 
-                                {
-                                    $message = "$theCommand was executed. <br>";
-                                    echo $message . "<br>";
-                                } 
-                                else 
-                                {
-                                    echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                                }
-                            }
-                            else 
-                            {
-                                if(isset($_POST['ExpirationDate']))
-                                {
-                                    $ExpirationDate = $_POST['ExpirationDate'];
-                                    $sql = "UPDATE payment_method SET ExpirationDate = '$ExpirationDate' WHERE AcctID = '$AcctID'"; 
-                                    if (mysqli_query($mysqli, $sql)) 
-                                    {
-                                        $message = "$theCommand was executed. <br>";
-                                        echo $message . "<br>";
-                                    } 
-                                    else 
-                                    {
-                                        echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                                    }
-                                }
-                            }
-                        }
-                        else 
-                        {
-                            echo "Specify AcctID value for WHERE clause <br>";
-                        }
+                        echo "Specify the id value for WHERE clause <br>";
                     }
                 }
                 else 
                 {
-                    echo "Specify the column for the WHERE clause <br>";
+                    echo "Specify the column for WHERE clause <br>";
                 }
             }
             if($theCommand == "delete")
@@ -703,62 +318,34 @@
                 if(isset($_POST['id']))
                 {
                     $id = $_POST['id'];
-                    $sql = "DELETE FROM payment_method WHERE id = '$id'";
-                    if (mysqli_query($mysqli, $sql)) 
-                    {
-                        $message = "$theCommand was executed. <br>";
-                        echo $message . "<br>";
-                    } 
-                    else
-                    {
-                        echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                    }
+
+                    $mysqli = new mysqli($host, $user, $pw, $database);
+                    $sql = "DELETE FROM payment_method WHERE id = ?";
+
+                    $stmt = $mysqli->prepare($sql);
+                    $stmt->bind_param("i", $id);
+                    $stmt->execute();
+                    echo "<br>Query has been processed. <br>";
+                    printf("Affected rows (DELETE): %d\n", $mysqli->affected_rows);
+                    $mysqli->close();
                 }
                 else if(isset($_POST['CreditCardNumber']) && isset($_POST['AcctID']))
                 {
                     $CreditCardNumber = $_POST['CreditCardNumber'];
                     $AcctID = $_POST['AcctID'];
-                    $sql = "DELETE FROM payment_method WHERE CreditCardNumber = '$CreditCardNumber' AND AcctID = '$AcctID'"; 
-                    if (mysqli_query($mysqli, $sql)) 
-                    {
-                        $message = "$theCommand was executed. <br>";
-                        echo $message . "<br>";
-                    } 
-                    else
-                    {
-                        echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                    }
-                }
-                else if(isset($_POST['CreditCardNumber']))
-                {
-                    $CreditCardNumber = $_POST['CreditCardNumber'];
-                    $sql = "DELETE FROM payment_method WHERE CreditCardNumber = '$CreditCardNumber'"; 
-                    if (mysqli_query($mysqli, $sql)) 
-                    {
-                        $message = "$theCommand was executed. <br>";
-                        echo $message . "<br>";
-                    } 
-                    else 
-                    {
-                        echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                    }
+
+                    $mysqli2 = new mysqli($host, $user, $pw, $database);
+                    $sql = "DELETE FROM payment_method WHERE CreditCardNumber = ? AND AcctID = ?"; 
+                    $stmt = $mysqli->prepare($sql);
+                    $stmt->bind_param("ii", $CreditCardNumber, $AcctID);
+                    $stmt->execute();
+                    echo "<br>Query has been processed. <br>";
+                    printf("Affected rows (DELETE): %d\n", $mysqli2->affected_rows);
+                    $mysqli2->close();
                 }
                 else
                 {
-                    if(isset($_POST['AcctID']))
-                    {
-                        $AcctID = $_POST['AcctID'];
-                        $sql = "DELETE FROM payment_method WHERE AcctID = '$AcctID'"; 
-                        if (mysqli_query($mysqli, $sql)) 
-                        {
-                            $message = "$theCommand was executed. <br>";
-                            echo $message . "<br>";
-                        } 
-                        else 
-                        {
-                            echo "Error: " . $sql . "<br>" . mysqli_error($mysqli);
-                        }
-                    }
+                    echo "Enter id value or CreditCardNumber and AcctID values for WHERE clause in the form <br>";
                 }
             }
         }
@@ -766,6 +353,7 @@
         // Let user perform another action
         echo "<br>";
         echo "<a href='netflixindex.php'>" . "Return to Homepage" . "</a>";
+        echo "<br><br><br>";
     }
     else
     {
